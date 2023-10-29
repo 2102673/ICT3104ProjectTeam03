@@ -82,6 +82,6 @@ class merge_config_then_run():
             config_now['skeleton_path'] = './mmpose_result.mp4'
         else:
             config_now['skeleton_path'] = data_path
-
         mp4_path = config_now['skeleton_path']
+        OmegaConf.save(config_now, "./pose.yaml")
         return mp4_path

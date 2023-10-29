@@ -78,13 +78,15 @@ def main(
         set_seed(seed)
 
     # Handle the output folder creation
+    output_model_video_folder = os.path.join(output_dir, os.path.basename(pretrained_model_path), os.path.basename(skeleton_path).split('.')[0])
+    print("Output Folder Path:", output_model_video_folder)
     if accelerator.is_main_process:
         # now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         # output_dir = os.path.join(output_dir, now)
         os.makedirs(output_dir, exist_ok=True)
-        os.makedirs(f"{output_dir}/samples", exist_ok=True)
-        os.makedirs(f"{output_dir}/inv_latents", exist_ok=True)
-        OmegaConf.save(config, os.path.join(output_dir, 'config.yaml'))
+        os.makedirs(output_model_video_folder, exist_ok=True)
+        os.makedirs(os.path.join(output_model_video_folder,"inference"), exist_ok=True)
+        OmegaConf.save(config, os.path.join(output_model_video_folder, 'config.yaml'))
 
     # Load scheduler, tokenizer and models.
     noise_scheduler = DDPMScheduler.from_pretrained(pretrained_model_path, subfolder="scheduler")
@@ -168,10 +170,10 @@ def main(
             sample = validation_pipeline(prompt, generator=generator, latents=ddim_inv_latent,
                                         skeleton_path=skeleton_path,
                                         **validation_data).videos
-            save_videos_grid(sample, f"{output_dir}/inference/sample-{global_step}-{str(seed)}-{now}/{prompt}.gif")
+            save_videos_grid(sample, f"{output_model_video_folder}/inference/sample-{global_step}-{str(seed)}-{now}/{prompt}.gif")
             samples.append(sample)
         samples = torch.concat(samples)
-        save_path = f"{output_dir}/inference/sample-{global_step}-{str(seed)}-{now}.gif"
+        save_path = f"{output_model_video_folder}/inference/sample-{global_step}-{str(seed)}-{now}.gif"
         save_videos_grid(samples, save_path)
         logger.info(f"Saved samples to {save_path}")
 

@@ -46,7 +46,7 @@ class HDVilaDataset(Dataset):
         print('dataset rank:', global_rank, ' / ',all_rank, ' ')
 
         # Set metadata path
-        self.meta_path = './data/CharadesVideo.json'
+        self.meta_path = os.path.join(video_path, 'CharadesVideo.json')
         # Set video directory
         self.data_dir = video_path
 
