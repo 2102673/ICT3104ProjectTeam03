@@ -1,0 +1,22 @@
+pretrained_model_path: ./checkpoints/stable-diffusion-v1-4
+output_dir: outputInference
+validation_data:
+  prompts:
+  - Iron man on the beach
+  video_length: 24
+  width: 512
+  height: 512
+  num_inference_steps: 100
+  guidance_scale: 12.5
+  use_inv_latent: false
+  num_inv_steps: 100
+  dataset_set: val
+validation_steps: 100
+train_batch_size: 1
+gradient_accumulation_steps: 1
+gradient_checkpointing: false
+resume_from_checkpoint: ./checkpoints/followyourpose_checkpoint-1000
+mixed_precision: 'no'
+enable_xformers_memory_efficient_attention: true
+seed: 33
+skeleton_path: ./outputSkeleton/1114/1114.mp4

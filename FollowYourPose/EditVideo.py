@@ -17,7 +17,7 @@ from IPython.display import display, HTML
 import time
 
 class EditVideo:
-  def __init__(self, original_path, skeleton_path, gif_path=None):
+  def __init__(self, original_path, skeleton_path=None, gif_path=None):
     """
     Initialise variable and load video
 
@@ -27,13 +27,13 @@ class EditVideo:
     - gif_path (string, optional): Path to the inference gif
     """
     self.__original_path = original_path
-    self.__skeleton_path = skeleton_path
     self.__original_clip = VideoFileClip(self.__original_path)
-    self.__skeleton_clip = VideoFileClip(self.__skeleton_path)
+
+    self.__skeleton_path = skeleton_path
+    self.__skeleton_clip = VideoFileClip(self.__skeleton_path) if self.__skeleton_path is not None else None
+
     self.__gif_path = gif_path
-    self.__gif_clip = None
-    if (gif_path != None):
-      self.__gif_clip = VideoFileClip(self.__gif_path)
+    self.__gif_clip = VideoFileClip(self.__gif_path) if self.__gif_path is not None else None
 
 
   def resize(self, width, height): 
@@ -45,11 +45,11 @@ class EditVideo:
     - height (int): The expected height.
     """
     print(f"Original Before: width:{self.__original_clip.size[0]} height:{self.__original_clip.size[1]}")
-    print(f"Skeleton Before: width:{self.__skeleton_clip.size[0]} height:{self.__skeleton_clip.size[1]}")
+    if (self.__skeleton_clip!=None):
+      print(f"Skeleton Before: width:{self.__skeleton_clip.size[0]} height:{self.__skeleton_clip.size[1]}")
 
     #Resize original and skeleton to input hight
     self.__original_clip = self.__original_clip.resize(height=height)
-    self.__skeleton_clip = self.__skeleton_clip.resize(height=height)
 
     # Calculate the left and right boundaries for center cropping
     left_bound = (self.__original_clip.size[0] - width) // 2
@@ -57,11 +57,20 @@ class EditVideo:
 
     # Crop the clips to the desired width
     self.__original_clip = self.__original_clip.crop(x1=left_bound, x2=right_bound)
-    self.__skeleton_clip = self.__skeleton_clip.crop(x1=left_bound, x2=right_bound)
+
+    if (self.__skeleton_clip!=None):
+      self.__skeleton_clip = self.__skeleton_clip.resize(height=height)
+
+      # Calculate the left and right boundaries for center cropping
+      left_bound = (self.__skeleton_clip.size[0] - width) // 2
+      right_bound = left_bound + width
+
+      self.__skeleton_clip = self.__skeleton_clip.crop(x1=left_bound, x2=right_bound)
 
 
     print(f"Original After: width:{self.__original_clip.size[0]} height:{self.__original_clip.size[1]}")
-    print(f"Skeleton After: width:{self.__skeleton_clip.size[0]} height:{self.__skeleton_clip.size[1]}")
+    if (self.__skeleton_clip!=None):
+      print(f"Skeleton After: width:{self.__skeleton_clip.size[0]} height:{self.__skeleton_clip.size[1]}")
   
   def trimByFrame(self, start_frame, end_frame):
     """
@@ -91,8 +100,8 @@ class EditVideo:
     Function to synchronise the fps for original and skeleton to the GIF
     """
 
-    if (self.__gif_path == None):
-      print("Unable to do sync fps as gif is not given")
+    if (self.__gif_path == None or self.__skeleton_path == None):
+      print("Unable to do sync fps as gif/skeleton is not given")
       return
 
     oldfps_o = self.__original_clip.fps
@@ -117,17 +126,17 @@ class EditVideo:
     - video_path (str, optional): Path to the video file.
     """
     if video_path==None:
-      display(self.__original_clip.ipython_display(width=400))
+      display(self.__original_clip.ipython_display(width=800))
     else:
-      display(VideoFileClip(video_path).ipython_display(width=400))
+      display(VideoFileClip(video_path).ipython_display(width=800))
 
   def perform_superimpose(self):
     """
     Function to overlay skeleton onto the original video and gif
     """
 
-    if (self.__gif_path == None):
-      print("Unable to do perform superimpose as gif is not given")
+    if (self.__gif_path == None or self.__skeleton_path == None):
+      print("Unable to do perform superimpose as gif/skeleton is not given")
       return
 
     #turn all fps to gif fps
@@ -145,9 +154,9 @@ class EditVideo:
         frame_o = cv2.resize(frame_o, (width, height))
 
         # Combine the original and skeleton frames
-        result = cv2.addWeighted(frame_o, 1, frame_s, 1, 0)
+        result = cv2.addWeighted(frame_o, 1, frame_s, 2, 0)
         # Combine the gif and skeleton frames
-        result2 = cv2.addWeighted(frame_g, 1, frame_s, 1, 0)
+        result2 = cv2.addWeighted(frame_g, 1, frame_s, 2, 0)
 
         # Append the processed frame to the list
         processed_frames.append(result)

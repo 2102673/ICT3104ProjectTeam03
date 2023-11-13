@@ -14,7 +14,7 @@ def get_frames(video_in):
     #resize the video
     clip = VideoFileClip(video_in)
     start_frame = 0  # 起始帧数
-    end_frame = 50  # 结束帧数
+    end_frame = 120  # 结束帧数
     
     if not os.path.exists('./raw_frames'):
         os.makedirs('./raw_frames')
