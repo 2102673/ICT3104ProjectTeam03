@@ -52,6 +52,7 @@ def main(
     seed: Optional[int] = None,
     skeleton_path: Optional[str] = None,
 ):
+    save_path = None
     *_, config = inspect.getargvalues(inspect.currentframe())
 
     accelerator = Accelerator(
@@ -79,7 +80,6 @@ def main(
 
     # Handle the output folder creation
     output_model_video_folder = os.path.join(output_dir, os.path.basename(pretrained_model_path), os.path.basename(skeleton_path).split('.')[0])
-    print("Output Folder Path:", output_model_video_folder)
     if accelerator.is_main_process:
         # now = datetime.datetime.now().strftime("%Y-%m-%dT%H-%M-%S")
         # output_dir = os.path.join(output_dir, now)
@@ -149,7 +149,6 @@ def main(
         if resume_from_checkpoint != "latest":
             load_path = resume_from_checkpoint
             output_dir = os.path.abspath(os.path.join(resume_from_checkpoint, ".."))
-        accelerator.print(f"load from checkpoint {load_path}")
         accelerator.load_state(load_path)
 
         global_step = int(load_path.split("-")[-1])
@@ -176,6 +175,7 @@ def main(
         save_path = f"{output_model_video_folder}/inference/sample-{global_step}-{str(seed)}-{now}.gif"
         save_videos_grid(samples, save_path)
         logger.info(f"Saved samples to {save_path}")
+    return save_path
 
 
 
@@ -184,4 +184,5 @@ if __name__ == "__main__":
     parser.add_argument("--config", type=str)
     parser.add_argument("--skeleton_path", type=str)
     args = parser.parse_args()
-    main(**OmegaConf.load(args.config), skeleton_path = args.skeleton_path)
+    returned_save_path = main(**OmegaConf.load(args.config), skeleton_path = args.skeleton_path)
+    print(returned_save_path)

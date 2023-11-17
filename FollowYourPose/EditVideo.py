@@ -106,8 +106,12 @@ class EditVideo:
 
     oldfps_o = self.__original_clip.fps
     oldfps_s = self.__skeleton_clip.fps
-    oldfps_g = self.__gif_clip.fps
+    oldfps_g = 8
 
+    frames_o = list(self.__original_clip.iter_frames())[0::5]
+    frames_s = list(self.__skeleton_clip.iter_frames())[0::5]
+    self.__original_clip = ImageSequenceClip(frames_o, fps=8)
+    self.__skeleton_clip = ImageSequenceClip(frames_s, fps=8)
     print(f"Set Original Video fps:{oldfps_o} -> {oldfps_g}")
     self.__original_clip = self.__original_clip.set_fps(oldfps_g)
     print(f"Original Video fps successfully set to {self.__original_clip.fps}")
