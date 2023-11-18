@@ -95,7 +95,11 @@ class EditVideo:
     # Trim the video clip
     self.__original_clip = self.__original_clip.subclip(max(0, start_time), min(self.__original_clip.duration, end_time))
 
-  def sync_fps(self): 
+  def set_fps(self, fps=8):
+    frames_o = list(self.__original_clip.iter_frames())[0::5]
+    self.__original_clip = ImageSequenceClip(frames_o, fps=fps)
+
+  def __sync_fps(self): 
     """
     Function to synchronise the fps for original and skeleton to the GIF
     """
@@ -144,7 +148,7 @@ class EditVideo:
       return
 
     #turn all fps to gif fps
-    self.sync_fps()
+    self.__sync_fps()
 
     # Get video properties
     width, height = self.__gif_clip.size
