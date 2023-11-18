@@ -359,7 +359,9 @@ def main(
         pipeline.save_pretrained(output_dir)
 
     accelerator.end_training()
-
+    
+    print("Model Training done")
+    print(f"Model is saved to: {output_dir}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
